@@ -7,14 +7,14 @@
 #include "Basic.SuffixArray.h"
 #include "Json.Types.h"
 
-namespace Service
+namespace Scrape
 {
     enum EventType
     {
-        characters_complete_event = 0x4000,
+        task_complete_event = 0x3000,
     };
 
-    struct CharactersCompleteEvent : public Basic::IEvent
+    struct TaskCompleteEvent : public Basic::IEvent
     {
         Basic::ByteStringRef cookie;
 

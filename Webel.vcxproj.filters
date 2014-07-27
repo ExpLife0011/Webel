@@ -460,6 +460,18 @@
     <ClInclude Include="Basic.TailLog.h">
       <Filter>Basic</Filter>
     </ClInclude>
+    <ClInclude Include="Scrape.Amazon.h">
+      <Filter>Scrape</Filter>
+    </ClInclude>
+    <ClInclude Include="Scrape.Netflix.h">
+      <Filter>Scrape</Filter>
+    </ClInclude>
+    <ClInclude Include="Scrape.Globals.h">
+      <Filter>Scrape</Filter>
+    </ClInclude>
+    <ClInclude Include="Scrape.Types.h">
+      <Filter>Scrape</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Http.BodyChunksFrame.cpp">
@@ -839,6 +851,18 @@
     </ClCompile>
     <ClCompile Include="Basic.TailLog.cpp">
       <Filter>Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="Scrape.Amazon.cpp">
+      <Filter>Scrape</Filter>
+    </ClCompile>
+    <ClCompile Include="Scrape.Netflix.cpp">
+      <Filter>Scrape</Filter>
+    </ClCompile>
+    <ClCompile Include="Scrape.Globals.cpp">
+      <Filter>Scrape</Filter>
+    </ClCompile>
+    <ClCompile Include="Scrape.Types.cpp">
+      <Filter>Scrape</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

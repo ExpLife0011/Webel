@@ -64,7 +64,7 @@ namespace Html
 
     bool Node::has_ancestor(ElementName* element_name)
     {
-        std::shared_ptr<Node> parent(this->parent);
+        std::shared_ptr<Node> parent = this->parent.lock();
 
         if (parent.get() == 0)
             return false;
@@ -348,6 +348,7 @@ namespace Html
         if (this->type == Html::NodeType::TEXT_NODE)
         {
             Html::TextNode* element = (Html::TextNode*)this;
+            stream->write_element(' ');
             element->write_to_human(stream, false);
             return;
         }
