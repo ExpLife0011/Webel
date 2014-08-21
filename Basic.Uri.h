@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "Basic.Path.h"
+
 namespace Basic
 {
     class Uri

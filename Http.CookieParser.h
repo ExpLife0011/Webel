@@ -3,7 +3,6 @@
 #pragma once
 
 #include "Http.Types.h"
-#include "Basic.IProcess.h"
 
 namespace Http
 {

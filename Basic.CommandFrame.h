@@ -2,67 +2,45 @@
 
 #pragma once
 
-#include "Basic.Frame.h"
-#include "Basic.Event.h"
-
 namespace Basic
 {
+    // $$$ rename file to CommandBuilder
+
     template <typename element_type>
-    class CommandFrame : public Frame
+    class CommandBuilder
     {
     private:
-        enum State
-        {
-            word_state = Start_State,
-            done_state = Succeeded_State,
-        };
-
         std::shared_ptr<String<element_type> > word;
         std::vector<std::shared_ptr<String<element_type> > >* command;
 
     public:
-        CommandFrame(std::vector<std::shared_ptr<String<element_type> > >* command) :
-            command(command)
+        CommandBuilder(std::vector<std::shared_ptr<String<element_type> > >* command) :
+            command(command),
+            word(std::make_shared<String<element_type> >())
         {
         }
 
         void reset()
         {
-            __super::reset();
             this->word = std::make_shared<String<element_type> >();
         }
 
-        virtual void IProcess::consider_event(IEvent* event)
+        bool write_element(element_type b)
         {
-            switch (get_state())
+            switch (b)
             {
-            case State::word_state:
-                {
-                    if (event->get_type() == EventType::ready_for_write_codepoints_event)
-                        throw Yield("event consumed");
+            case '\r':
+                this->command->push_back(this->word);
+                return true;
 
-                    element_type b;
-                    Event::ReadNext(event, &b);
-
-                    if (b == ' ')
-                    {
-                        this->command->push_back(this->word);
-                        this->word = std::make_shared<String<element_type> >();
-                    }
-                    else if (b == '\r')
-                    {
-                        this->command->push_back(this->word);
-                        switch_to_state(State::done_state);
-                    }
-                    else
-                    {
-                        this->word->push_back(b);
-                    }
-                }
-                break;
+            case ' ':
+                this->command->push_back(this->word);
+                this->word = std::make_shared<String<element_type> >();
+                return false;
 
             default:
-                throw FatalError("CommandFrame::handle_event unexpected state");
+                this->word->push_back(b);
+                return false;
             }
         }
     };

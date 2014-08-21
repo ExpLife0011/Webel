@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Basic.ICompleter.h"
+#include "Basic.IJobEventHandler.h"
 
 namespace Basic
 {
@@ -14,13 +14,13 @@ namespace Basic
         void complete(uint32 count, uint32 error);
 
         std::shared_ptr<Job> self;
-        std::weak_ptr<ICompleter> completer;
+        std::weak_ptr<IJobEventHandler> event_handler;
         std::shared_ptr<void> context;
 
     public:
         static void complete(OVERLAPPED_ENTRY* entry);
-        static std::shared_ptr<Job> make(std::shared_ptr<ICompleter> completer, std::shared_ptr<void> context);
+        static std::shared_ptr<Job> make(std::shared_ptr<IJobEventHandler> event_handler, std::shared_ptr<void> context);
 
-        Job(std::shared_ptr<ICompleter> completer, std::shared_ptr<void> context);
+        Job(std::shared_ptr<IJobEventHandler> event_handler, std::shared_ptr<void> context);
     };
 }

@@ -2,11 +2,8 @@
 
 #pragma once
 
-#include "Basic.Event.h"
-#include "Basic.IProcess.h"
 #include "Basic.MemoryRange.h"
 #include "Basic.CountStream.h"
-#include "Basic.Frame.h"
 
 namespace Tls
 {
@@ -623,11 +620,6 @@ namespace Tls
         uncompressed = 0,
         ansiX962_compressed_prime = 1,
         ansiX962_compressed_char2 = 2,
-    };
-
-    enum EventType
-    {
-        change_cipher_spec_event = 0x2000,
     };
 
     ///////////////////////////////////////////////////////////////////////////

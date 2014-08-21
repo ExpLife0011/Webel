@@ -2,7 +2,8 @@
 
 #pragma once
 
-#include "Basic.ICompleter.h"
+#include "Basic.IJobEventHandler.h"
+#include "Basic.ILog.h"
 
 namespace Basic
 {
@@ -12,7 +13,7 @@ namespace Basic
     {
         enum Type
         {
-            ready_for_send_type,
+            connect_type,
             send_type,
             receive_type,
             accept_type,
@@ -27,7 +28,7 @@ namespace Basic
         SocketJobContext(Type type);
     };
 
-    class Socket : public ICompleter, public std::enable_shared_from_this<Socket>
+    class Socket : public IJobEventHandler, public std::enable_shared_from_this<Socket>
     {
     protected:
         static const DWORD addressLength = sizeof(sockaddr_in) + 16;
@@ -36,16 +37,18 @@ namespace Basic
 
         virtual void CompleteReceive(std::shared_ptr<ByteString> bytes, uint32 error);
         virtual void CompleteSend(std::shared_ptr<ByteString> bytes, uint32 count, uint32 error);
-        virtual void CompleteReadyForSend();
+        virtual void CompleteConnect();
         virtual void CompleteAccept(ServerSocket* server_socket, std::shared_ptr<ByteString> bytes, uint32 count, uint32 error);
         virtual void CompleteDisconnect();
 
     public:
         SOCKET socket;
+        std::weak_ptr<ILog> session_log;
 
         Socket();
         virtual ~Socket();
 
-        virtual void ICompleter::complete(std::shared_ptr<void> context, uint32 count, uint32 error);
+        virtual void IJobEventHandler::job_completed(std::shared_ptr<void> context, uint32 count, uint32 error);
+        void set_session_log(std::shared_ptr<ILog> session_log);
     };
 }

@@ -3,7 +3,6 @@
 #include "stdafx.h"
 #include "Http.RequestFrame.h"
 #include "Http.Globals.h"
-#include "Basic.Event.h"
 #include "Basic.CountStream.h"
 #include "Basic.Globals.h"
 

@@ -11,32 +11,27 @@ namespace Basic
 {
     Globals* globals = 0;
 
+    __declspec(thread) LogStream* log_stream = 0;
+
     Globals::Globals()
     {
     }
 
     bool Globals::HandleError(const char* context, uint32 error)
     {
-        if (this->error_handler.get() == 0)
-            return false;
-
-        return this->error_handler->HandleError(context, error);
+        TextWriter writer(LogStream());
+        writer.HandleError(context, error);
+        return false;
     }
 
-    Basic::IStream<Codepoint>* Globals::LogStream()
+    LogStream* Globals::LogStream()
     {
-        if (this->error_handler.get() == 0)
-            throw FatalError("no error handler set");
+        if (log_stream == 0)
+        {
+            log_stream = new Basic::LogStream();
+        }
 
-        return this->error_handler->LogStream();
-    }
-
-    Basic::TextWriter* Globals::DebugWriter()
-    {
-        if (this->error_handler.get() == 0)
-            throw FatalError("no error handler set");
-
-        return this->error_handler->DebugWriter();
+        return log_stream;
     }
 
     void Globals::GetEncoder(std::shared_ptr<UnicodeString> encoding, std::shared_ptr<IEncoder>* encoder)
@@ -63,9 +58,8 @@ namespace Basic
         it->second->CreateDecoder(decoder);
     }
 
-    void Globals::Initialize(std::shared_ptr<IErrorHandler> error_handler, std::shared_ptr<ICompletionQueue> completion_queue)
+    void Globals::Initialize(std::shared_ptr<ICompletionQueue> completion_queue)
     {
-        this->error_handler = error_handler;
         this->completion_queue = completion_queue;
 
         this->ascii_index = std::make_shared<SingleByteEncodingIndex>();

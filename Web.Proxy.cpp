@@ -68,7 +68,7 @@ namespace Web
                     throw Yield("unexpected event");
                 }
 
-                Basic::globals->DebugWriter()->WriteLine("accepted");
+                TextWriter(Basic::globals->LogStream()).write_line("accepted");
 
                 std::shared_ptr<IProcess> completion = this->completion.lock();
                 if (completion.get() != 0)

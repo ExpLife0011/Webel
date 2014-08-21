@@ -2,13 +2,12 @@
 
 #include "stdafx.h"
 #include "Basic.ServerSocket.h"
-#include "Basic.Event.h"
 #include "Basic.ListenSocket.h"
 
 namespace Basic
 {
-    ServerSocket::ServerSocket(std::shared_ptr<IProcess> protocol, uint32 receive_buffer_size) :
-        ConnectedSocket(protocol, receive_buffer_size)
+    ServerSocket::ServerSocket(std::shared_ptr<ITransportEventHandler<byte> > event_handler, uint32 receive_buffer_size) :
+        ConnectedSocket(event_handler, receive_buffer_size)
     {
     }
 
@@ -32,16 +31,14 @@ namespace Basic
 
         InitializePeer((sockaddr_in*)&remoteAddress);
 
-        std::shared_ptr<IProcess> protocol = this->protocol.lock();
-        if (protocol.get() == 0)
+        std::shared_ptr<ITransportEventHandler<byte> > event_handler = this->event_handler.lock();
+        if (event_handler.get() == 0)
         {
-            Disconnect(0);
+            Disconnect();
             return;
         }
 
-        ReadyForWriteBytesEvent event;
-        event.Initialize(&this->protocol_element_source);
-        produce_event(protocol.get(), &event);
+        event_handler->transport_connected();
 
         if (count > 0)
         {

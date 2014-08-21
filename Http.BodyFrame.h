@@ -4,7 +4,6 @@
 
 #include "Http.LengthBodyFrame.h"
 #include "Http.BodyChunksFrame.h"
-#include "Http.DisconnectBodyFrame.h"
 #include "Http.HeadersFrame.h"
 #include "Basic.IStream.h"
 
@@ -12,7 +11,7 @@ namespace Http
 {
     using namespace Basic;
 
-    class BodyFrame : public Frame
+    class BodyFrame : public StateMachine
     {
     private:
         enum State
@@ -36,12 +35,11 @@ namespace Http
         std::shared_ptr<IStream<byte> > body_stream;
         std::shared_ptr<BodyChunksFrame> chunks_frame;
         std::shared_ptr<LengthBodyFrame> chunk_frame;
-        std::shared_ptr<DisconnectBodyFrame> disconnect_frame;
         HeadersFrame headers_frame;
 
         void switch_to_state(State state);
 
-        virtual void IProcess::consider_event(IEvent* event);
+        bool offer_elements(ElementSource<byte>* element_source);
 
     public:
         BodyFrame(std::shared_ptr<NameValueCollection> headers);

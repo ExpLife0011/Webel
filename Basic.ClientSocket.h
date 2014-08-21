@@ -20,11 +20,11 @@ namespace Basic
         State state;
         ByteStringRef sendBuffer;
 
-        virtual void CompleteReadyForSend();
+        virtual void CompleteConnect();
         virtual void CompleteSend(std::shared_ptr<ByteString> bytes, uint32 count, uint32 error);
 
     public:
-        ClientSocket(std::shared_ptr<IProcess> protocol, uint32 receive_buffer_size);
+        ClientSocket(std::shared_ptr<ITransportEventHandler<byte> > event_handler, uint32 receive_buffer_size);
 
         bool Resolve(UnicodeStringRef host, uint16 port, sockaddr_in* remoteAddress);
         void Initialize();

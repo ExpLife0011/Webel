@@ -5,6 +5,7 @@
 #include "Basic.Globals.h"
 #include "Basic.Utf8Encoder.h"
 #include "Basic.Utf8Decoder.h"
+#include "Basic.Utf8Decoder.h"
 
 namespace Basic
 {
@@ -896,7 +897,7 @@ namespace Basic
     void Uri::percent_encode(byte b, IStream<Codepoint>* result)
     {
         TextWriter writer(result);
-        writer.WriteFormat<3>("%%%02X", b);
+        writer.write_format<3>("%%%02X", b);
     }
 
     void Uri::percent_decode(UnicodeString* string, IStream<byte>* bytes)

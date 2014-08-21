@@ -2,16 +2,17 @@
 
 #pragma once
 
-#include "Basic.IProcess.h"
+#include "Basic.StateMachine.h"
 #include "Http.LengthBodyFrame.h"
 #include "Basic.HexNumberStream.h"
+#include "Basic.IStream.h"
 
 namespace Http
 {
     using namespace Basic;
 
     // RFC 2616 3.6.1
-    class BodyChunksFrame : public Frame
+    class BodyChunksFrame : public StateMachine
     {
     private:
         enum State
@@ -24,7 +25,6 @@ namespace Http
             done_state = Succeeded_State,
             start_chunk_error,
             expecting_LF_after_size_error,
-            chunk_frame_failed,
             expecting_CR_after_chunk_error,
             expecting_LF_after_chunk_error,
         };
@@ -33,9 +33,11 @@ namespace Http
         HexNumberStream<byte, uint32> size_stream;
         LengthBodyFrame chunk_frame;
 
-        virtual void IProcess::consider_event(IEvent* event);
+        void write_element(byte element);
 
     public:
         BodyChunksFrame(std::shared_ptr<IStream<byte> > body_stream);
+
+        bool write_elements(ElementSource<byte>* element_source);
     };
 }

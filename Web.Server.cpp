@@ -65,7 +65,7 @@ namespace Web
                     throw Yield("unexpected event");
                 }
 
-                Basic::globals->DebugWriter()->WriteLine("accepted");
+                TextWriter(Basic::globals->LogStream()).write_line("accepted");
 
                 std::shared_ptr<IProcess> completion = this->completion.lock();
                 if (completion.get() != 0)
@@ -95,9 +95,9 @@ namespace Web
             {
                 delegate_event_change_state_on_fail(this->request_frame.get(), event, State::request_frame_failed);
 
-                Basic::globals->DebugWriter()->write_literal("Request received: ");
-                render_request_line(this->request.get(),  &Basic::globals->DebugWriter()->decoder);
-                Basic::globals->DebugWriter()->WriteLine();
+                TextWriter(Basic::globals->LogStream()).write_literal("Request received: ");
+                render_request_line(this->request.get(),  &TextWriter(Basic::globals->LogStream()).decoder);
+                TextWriter(Basic::globals->LogStream()).write_line();
 
                 this->response = std::make_shared<Response>();
                 this->response->Initialize();
@@ -125,9 +125,9 @@ namespace Web
 
                 switch_to_state(State::response_done_state);
 
-                Basic::globals->DebugWriter()->write_literal("Response sent: ");
-                render_response_line(this->response.get(), &Basic::globals->DebugWriter()->decoder);
-                Basic::globals->DebugWriter()->WriteLine();
+                TextWriter(Basic::globals->LogStream()).write_literal("Response sent: ");
+                render_response_line(this->response.get(), &TextWriter(Basic::globals->LogStream()).decoder);
+                TextWriter(Basic::globals->LogStream()).write_line();
             }
             break;
 

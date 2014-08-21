@@ -4,7 +4,6 @@
 #include "Http.Globals.h"
 #include "Http.HeadersFrame.h"
 #include "Http.Types.h"
-#include "Basic.Event.h"
 
 namespace Http
 {
@@ -15,15 +14,12 @@ namespace Http
     {
     }
 
-    void HeadersFrame::consider_event(IEvent* event)
+    void HeadersFrame::write_element(byte b)
     {
         switch (get_state())
         {
         case State::expecting_name_state:
             {
-                byte b;
-                Event::ReadNext(event, &b);
-
                 if (b == Http::globals->CR)
                 {
                     switch_to_state(State::expecting_LF_after_headers_state);
@@ -43,9 +39,6 @@ namespace Http
 
         case State::receiving_name_state:
             {
-                byte b;
-                Event::ReadNext(event, &b);
-
                 if (b == Http::globals->colon)
                 {
                     this->value = std::make_shared<UnicodeString>();
@@ -74,9 +67,6 @@ namespace Http
 
         case State::expecting_colon_state:
             {
-                byte b;
-                Event::ReadNext(event, &b);
-
                 if (b == Http::globals->colon)
                 {
                     switch_to_state(State::expecting_value_state);
@@ -93,9 +83,6 @@ namespace Http
 
         case State::expecting_value_state:
             {
-                byte b;
-                Event::ReadNext(event, &b);
-
                 if (b == Http::globals->CR)
                 {
                     switch_to_state(State::expecting_LF_after_value_state);
@@ -113,9 +100,6 @@ namespace Http
 
         case State::receiving_value_state:
             {
-                byte b;
-                Event::ReadNext(event, &b);
-
                 if (b == Http::globals->CR)
                 {
                     switch_to_state(State::expecting_LF_after_value_state);
@@ -129,9 +113,6 @@ namespace Http
 
         case State::expecting_LF_after_value_state:
             {
-                byte b;
-                Event::ReadNext(event, &b);
-
                 if (b == Http::globals->LF)
                 {
                     switch_to_state(State::expecting_next_header_state);
@@ -145,9 +126,6 @@ namespace Http
 
         case State::expecting_next_header_state:
             {
-                byte b;
-                Event::ReadNext(event, &b);
-
                 if (b == Http::globals->CR)
                 {
                     NameValueCollection::value_type nv(this->name, this->value);
@@ -183,9 +161,6 @@ namespace Http
 
         case State::expecting_LF_after_headers_state:
             {
-                byte b;
-                Event::ReadNext(event, &b);
-
                 if (b == Http::globals->LF)
                 {
                     switch_to_state(State::done_state);

@@ -22,11 +22,12 @@ namespace Basic
 
         void write_elements(const char* text, uint32 count);
         void write_c_str(const char* text);
-        void WriteLine(const char* text);
-        void WriteLine();
-        void WriteThreadId();
-        void WriteTimestamp();
-        void WriteError(uint32 error);
+        void write_line(const char* text);
+        void write_line();
+        void write_thread_id();
+        void write_timestamp();
+        void write_error_code(uint32 error);
+        void HandleError(const char* context, uint32 error);
 
         template <int count>
         void write_literal(const char (&text)[count])
@@ -38,22 +39,22 @@ namespace Basic
         }
 
         template<int max>
-        void WriteFormat(const char* format, va_list args)
+        void write_format(const char* format, va_list args)
         {
             char temp[max + 1];
             uint32 count = vsprintf_s(temp, format, args);
             if (count < 0)
-                throw FatalError("WriteFormat failed");
+                throw FatalError("write_format failed");
 
             return write_elements(temp, count);
         }
 
         template<int max>
-        void WriteFormat(const char* format, ...)
+        void write_format(const char* format, ...)
         {
             va_list args;
             va_start(args, format);
-            WriteFormat<max>(format, args);
+            write_format<max>(format, args);
             va_end(args);
         }
     };

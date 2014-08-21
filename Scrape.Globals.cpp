@@ -9,6 +9,7 @@ namespace Scrape
 
     Globals::Globals()
     {
+        // $$$ make persistent
         this->video_index = std::make_shared<Index>();
 
 		initialize_unicode(&streams_namespace, "dynamo.streams");
@@ -90,7 +91,7 @@ namespace Scrape
                 as_of->value = std::make_shared<UnicodeString>();
 
                 TextWriter writer(as_of->value.get());
-                writer.WriteTimestamp();
+                writer.write_timestamp();
 
                 Json::MemberList::_Pairib as_of_result = object->members.insert(Json::MemberList::value_type(as_of_property, as_of));
                 if (as_of_result.second == false)

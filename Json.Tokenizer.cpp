@@ -6,7 +6,6 @@
 #include "Json.Types.h"
 #include "Json.Parser.h"
 #include "Basic.StreamFrame.h"
-#include "Basic.Event.h"
 
 namespace Json
 {

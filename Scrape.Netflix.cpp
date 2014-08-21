@@ -38,7 +38,7 @@ namespace Scrape
 			this->client->get_url(&url);
 
 			url->write_to_stream(Basic::globals->LogStream(), 0, 0);
-			Basic::globals->DebugWriter()->WriteLine(" did not return 200");
+			TextWriter(Basic::globals->LogStream()).write_line(" did not return 200");
 
 			return false;
 		}
@@ -303,8 +303,8 @@ namespace Scrape
 
 	void Netflix::ScrapeMovies(std::shared_ptr<Basic::Uri>* next_page, uint32* next_row)
 	{
-		Basic::globals->DebugWriter()->WriteFormat<0x100>("Row %d+", this->current_row);
-		Basic::globals->DebugWriter()->WriteLine();
+		TextWriter(Basic::globals->LogStream()).write_format<0x100>("Row %d+", this->current_row);
+		TextWriter(Basic::globals->LogStream()).write_line();
 
 		for (uint32 i = 0; i < this->current_page->links.size(); i++)
 		{

@@ -51,7 +51,7 @@ namespace Basic
             UnicodeStringRef value_string = std::make_shared<UnicodeString>();
 
             TextWriter writer(value_string.get());
-            writer.WriteFormat<0x10>("%d", value);
+            writer.write_format<0x10>("%d", value);
 
             set_string(name, value_string);
         }

@@ -14,9 +14,9 @@ namespace Basic
             this->entry->reserve(0x100);
 
             TextWriter text(this->entry.get());
-            text.WriteThreadId();
+            text.write_thread_id();
             text.write_literal(" ");
-            text.WriteTimestamp();
+            text.write_timestamp();
             text.write_literal(" ");
         }
 

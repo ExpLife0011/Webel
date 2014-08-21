@@ -250,7 +250,7 @@ namespace Web
                 //   the hexadecimal value of the byte in question (zero-padded if necessary).
                 UnicodeString s;
                 TextWriter writer(&s);
-                writer.WriteFormat<0x10>("%%%02X", b);
+                writer.write_format<0x10>("%%%02X", b);
 
                 //2. Encode the string s as US-ASCII, so that it is now a byte string.
                 ByteString encoded_s;

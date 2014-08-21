@@ -4,7 +4,6 @@
 #include "Http.Globals.h"
 #include "Http.BodyChunksFrame.h"
 #include "Http.Types.h"
-#include "Basic.Event.h"
 
 namespace Http
 {
@@ -17,15 +16,41 @@ namespace Http
     {
     }
 
-    void BodyChunksFrame::consider_event(IEvent* event)
+    bool BodyChunksFrame::write_elements(ElementSource<byte>* element_source)
+    {
+        switch (get_state())
+        {
+        case State::start_chunk_state:
+        case State::expecting_LF_after_size_state:
+        case State::expecting_CR_after_chunk_state:
+        case State::expecting_LF_after_chunk_state:
+            {
+                write_element(b);
+            }
+            break;
+
+        case State::chunk_frame_pending_state:
+            {
+                bool done = this->chunk_frame.write_elements(element_source);
+
+                if (!done)
+                    return;
+
+                switch_to_state(State::expecting_CR_after_chunk_state);
+            }
+            break;
+
+        default:
+            throw FatalError("BodyChunksFrame::handle_event unexpected state");
+        }
+    }
+
+    void BodyChunksFrame::write_element(byte b)
     {
         switch (get_state())
         {
         case State::start_chunk_state:
             {
-                byte b;
-                Event::ReadNext(event, &b);
-
                 if (b == Http::globals->CR)
                 {
                     switch_to_state(State::expecting_LF_after_size_state);
@@ -44,9 +69,6 @@ namespace Http
 
         case State::expecting_LF_after_size_state:
             {
-                byte b;
-                Event::ReadNext(event, &b);
-
                 if (b != Http::globals->LF)
                 {
                     switch_to_state(State::expecting_LF_after_size_error);
@@ -66,15 +88,18 @@ namespace Http
             break;
 
         case State::chunk_frame_pending_state:
-            delegate_event_change_state_on_fail(&this->chunk_frame, event, State::chunk_frame_failed);
-            switch_to_state(State::expecting_CR_after_chunk_state);
+            {
+                bool done = this->chunk_frame.write_elements(&b, 1);
+
+                if (!done)
+                    return;
+
+                switch_to_state(State::expecting_CR_after_chunk_state);
+            }
             break;
 
         case State::expecting_CR_after_chunk_state:
             {
-                byte b;
-                Event::ReadNext(event, &b);
-
                 if (b != Http::globals->CR)
                 {
                     switch_to_state(State::expecting_CR_after_chunk_error);
@@ -87,9 +112,6 @@ namespace Http
 
         case State::expecting_LF_after_chunk_state:
             {
-                byte b;
-                Event::ReadNext(event, &b);
-
                 if (b != Http::globals->LF)
                 {
                     switch_to_state(State::expecting_LF_after_chunk_error);

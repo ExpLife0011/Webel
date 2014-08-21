@@ -2,13 +2,12 @@
 
 #pragma once
 
-#include "Basic.IProcess.h"
 #include "Basic.IStream.h"
 #include "Basic.IStreamWriter.h"
 
 namespace Basic
 {
-    class MemoryRange : public IProcess, public IStream<byte>
+    class MemoryRange : public ArrayStream<byte>
     {
     private:
         uint32 count;
@@ -25,10 +24,9 @@ namespace Basic
         virtual void IStream<byte>::write_element(byte element);
         virtual void IStream<byte>::write_eof();
 
-        virtual void IProcess::consider_event(IEvent* event);
-        virtual bool IProcess::in_progress();
-        virtual bool IProcess::succeeded();
-        virtual bool IProcess::failed();
+        bool in_progress();
+        bool succeeded();
+        bool failed();
 
         uint32 Length();
     };

@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "Basic.Socket.h"
 #include "Basic.Globals.h"
+#include "Basic.LogFrame.h"
 
 namespace Basic
 {
@@ -26,16 +27,22 @@ namespace Basic
             closesocket(socket);
     }
 
-    void Socket::complete(std::shared_ptr<void> context, uint32 count, uint32 error)
+    void Socket::set_session_log(std::shared_ptr<ILog> session_log)
+    {
+        this->session_log = session_log;
+    }
+
+    void Socket::job_completed(std::shared_ptr<void> context, uint32 count, uint32 error)
     {
         Hold hold(this->lock);
+        LogFrame log(this->session_log.lock());
 
         std::shared_ptr<SocketJobContext> socket_context = std::static_pointer_cast<SocketJobContext>(context);
 
         switch(socket_context->type)
         {
-        case SocketJobContext::ready_for_send_type:
-            CompleteReadyForSend();
+        case SocketJobContext::connect_type:
+            CompleteConnect();
             break;
 
         case SocketJobContext::send_type:
@@ -65,7 +72,7 @@ namespace Basic
     {
     }
 
-    void Socket::CompleteReadyForSend()
+    void Socket::CompleteConnect()
     {
     }
 

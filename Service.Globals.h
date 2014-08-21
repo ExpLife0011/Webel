@@ -3,11 +3,10 @@
 #pragma once
 
 #include <Windows.h>
-#include "Basic.ICompleter.h"
+#include "Basic.IJobEventHandler.h"
 #include "Basic.LogStream.h"
 #include "Basic.ListenSocket.h"
 #include "Basic.Cng.h"
-#include "Basic.Frame.h"
 #include "Basic.Uri.h"
 #include "Basic.Console.h"
 #include "Service.AdminProtocol.h"
@@ -27,7 +26,7 @@ namespace Service
 {
     using namespace Basic;
 
-    class Globals : public Frame, public ICompleter, public IErrorHandler, public ICompletionQueue, public Tls::ICertificate, public std::enable_shared_from_this<Globals>
+    class Globals : public Frame, public IThread, public IJobEventHandler, public ICompletionQueue, public Tls::ICertificate, public std::enable_shared_from_this<Globals>
     {
     private:
         enum State
@@ -51,6 +50,7 @@ namespace Service
         Tls::Certificates certificates;
 
         static DWORD WINAPI Thread(void* param);
+
         bool ParseCert(ByteString* bytes, uint32 count, uint32 error);
         bool ReadCertificate();
         bool CreateSelfSignCert();
@@ -102,13 +102,13 @@ namespace Service
         Globals();
         ~Globals();
 
-        virtual void ICompleter::complete(std::shared_ptr<void> context, uint32 count, uint32 error);
+        virtual void IJobEventHandler::job_completed(std::shared_ptr<void> context, uint32 count, uint32 error);
+        virtual bool IThread::thread();
 
         bool Initialize();
         void WaitForStopSignal();
         void Cleanup();
         bool SendStopSignal();
-        bool Thread();
         bool SetThreadCount(uint32 count);
 
         template <int value_count>        
@@ -129,10 +129,6 @@ namespace Service
             strcat_s(value, directory);
             strcat_s(value, name);
         }
-
-        virtual bool IErrorHandler::HandleError(const char* context, uint32 error);
-        virtual Basic::IStream<Codepoint>* IErrorHandler::LogStream();
-        virtual Basic::TextWriter* IErrorHandler::DebugWriter();
 
         virtual void ICompletionQueue::BindToCompletionQueue(Socket* socket);
         virtual void ICompletionQueue::BindToCompletionQueue(FileLog* log_file);

@@ -62,8 +62,8 @@ namespace Service
                         std::shared_ptr<Uri> url;
                         this->client->get_url(&url);
 
-                        url->write_to_stream(Service::globals->LogStream(), 0, 0);
-                        Service::globals->DebugWriter()->WriteLine(" did not return 200");
+                        url->write_to_stream(Basic::globals->LogStream(), 0, 0);
+                        TextWriter(Basic::globals->LogStream()).write_line(" did not return 200");
 
                         switch_to_state(State::done_state);
                         return;
@@ -238,7 +238,7 @@ namespace Service
                     if (found_ascii == false)
                         throw FatalError("didn't find us-ascii encoding");
 
-                    Service::globals->DebugWriter()->WriteFormat<0x100>("Recognized %d encodings\n", Basic::globals->decoder_map.size());
+                    TextWriter(Basic::globals->LogStream()).write_format<0x100>("Recognized %d encodings\n", Basic::globals->decoder_map.size());
 
                     std::shared_ptr<IProcess> completion = this->completion.lock();
                     if (completion.get() != 0)

@@ -2,13 +2,15 @@
 
 #pragma once
 
-#include "Basic.Frame.h"
 #include "Web.Client.h"
 #include "Json.Parser.h"
 
 namespace Service
 {
     using namespace Basic;
+
+
+    // $$$ should be a persistent object and store the results (by way of caching and decoupling from whatwg)
 
     class StandardEncodings : public Frame, public std::enable_shared_from_this<StandardEncodings>
     {

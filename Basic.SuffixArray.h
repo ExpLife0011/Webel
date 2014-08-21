@@ -97,7 +97,7 @@ namespace Basic
                 Basic::globals->LogStream()->write_elements(
                     this->results[i].key->address() + this->results[i].key_index,
                     this->results[i].key->size() - this->results[i].key_index);
-                Basic::globals->DebugWriter()->WriteLine();
+                TextWriter(Basic::globals->LogStream()).write_line();
             }
         }
 

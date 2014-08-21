@@ -250,9 +250,6 @@
     <ClInclude Include="Http.LengthBodyFrame.h">
       <Filter>Http</Filter>
     </ClInclude>
-    <ClInclude Include="Http.DisconnectBodyFrame.h">
-      <Filter>Http</Filter>
-    </ClInclude>
     <ClInclude Include="Tls.ExtensionHeaderFrame.h">
       <Filter>Tls</Filter>
     </ClInclude>
@@ -261,18 +258,6 @@
     </ClInclude>
     <ClInclude Include="Http.ResponseHeadersFrame.h">
       <Filter>Http</Filter>
-    </ClInclude>
-    <ClInclude Include="Basic.Event.h">
-      <Filter>Basic</Filter>
-    </ClInclude>
-    <ClInclude Include="Basic.Frame.h">
-      <Filter>Basic</Filter>
-    </ClInclude>
-    <ClInclude Include="Basic.FrameStream.h">
-      <Filter>Basic</Filter>
-    </ClInclude>
-    <ClInclude Include="Basic.IElementSource.h">
-      <Filter>Basic</Filter>
     </ClInclude>
     <ClInclude Include="Basic.ElementSource.h">
       <Filter>Basic</Filter>
@@ -319,12 +304,6 @@
     <ClInclude Include="Basic.SingleByteEncodingIndex.h">
       <Filter>Basic</Filter>
     </ClInclude>
-    <ClInclude Include="Basic.IProcess.h">
-      <Filter>Basic</Filter>
-    </ClInclude>
-    <ClInclude Include="Basic.IEvent.h">
-      <Filter>Basic</Filter>
-    </ClInclude>
     <ClInclude Include="Json.Script.h">
       <Filter>Json</Filter>
     </ClInclude>
@@ -345,9 +324,6 @@
     </ClInclude>
     <ClInclude Include="Tls.ServerHandshake.h">
       <Filter>Tls</Filter>
-    </ClInclude>
-    <ClInclude Include="Basic.IErrorHandler.h">
-      <Filter>Basic</Filter>
     </ClInclude>
     <ClInclude Include="Http.MediaTypeStream.h">
       <Filter>Http</Filter>
@@ -424,9 +400,6 @@
     <ClInclude Include="Basic.IStreamWriter.h">
       <Filter>Basic</Filter>
     </ClInclude>
-    <ClInclude Include="Basic.ICompleter.h">
-      <Filter>Basic</Filter>
-    </ClInclude>
     <ClInclude Include="Basic.Job.h">
       <Filter>Basic</Filter>
     </ClInclude>
@@ -471,6 +444,30 @@
     </ClInclude>
     <ClInclude Include="Scrape.Types.h">
       <Filter>Scrape</Filter>
+    </ClInclude>
+    <ClInclude Include="Basic.IThread.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="Service.User.h">
+      <Filter>Service</Filter>
+    </ClInclude>
+    <ClInclude Include="Basic.LogFrame.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="Basic.StateMachine.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="Basic.IJobEventHandler.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="Basic.ITransportEventHandler.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="Basic.Path.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="Web.IClientEventHandler.h">
+      <Filter>Web</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -687,9 +684,6 @@
     <ClCompile Include="Http.LengthBodyFrame.cpp">
       <Filter>Http</Filter>
     </ClCompile>
-    <ClCompile Include="Http.DisconnectBodyFrame.cpp">
-      <Filter>Http</Filter>
-    </ClCompile>
     <ClCompile Include="Tls.ExtensionHeaderFrame.cpp">
       <Filter>Tls</Filter>
     </ClCompile>
@@ -717,12 +711,6 @@
     <ClCompile Include="Web.Page.cpp">
       <Filter>Web</Filter>
     </ClCompile>
-    <ClCompile Include="Basic.Event.cpp">
-      <Filter>Basic</Filter>
-    </ClCompile>
-    <ClCompile Include="Basic.FrameStream.cpp">
-      <Filter>Basic</Filter>
-    </ClCompile>
     <ClCompile Include="Basic.Uri.cpp">
       <Filter>Basic</Filter>
     </ClCompile>
@@ -733,9 +721,6 @@
       <Filter>Basic</Filter>
     </ClCompile>
     <ClCompile Include="Basic.SingleByteEncodingIndex.cpp">
-      <Filter>Basic</Filter>
-    </ClCompile>
-    <ClCompile Include="Basic.Frame.cpp">
       <Filter>Basic</Filter>
     </ClCompile>
     <ClCompile Include="Tls.Types.cpp">
@@ -863,6 +848,18 @@
     </ClCompile>
     <ClCompile Include="Scrape.Types.cpp">
       <Filter>Scrape</Filter>
+    </ClCompile>
+    <ClCompile Include="Service.User.cpp">
+      <Filter>Service</Filter>
+    </ClCompile>
+    <ClCompile Include="Basic.LogFrame.cpp">
+      <Filter>Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="Basic.StateMachine.cpp">
+      <Filter>Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="Basic.Path.cpp">
+      <Filter>Basic</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

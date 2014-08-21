@@ -3,8 +3,7 @@
 #pragma once
 
 #include "Basic.IStream.h"
-#include "Basic.IProcess.h"
-#include "Basic.Frame.h"
+#include "Basic.StateMachine.h"
 
 namespace Html
 {
@@ -21,7 +20,7 @@ namespace Html
 
     enum TokenizerState
     {
-        data_state = Frame::Start_State,
+        data_state = StateMachine::Start_State,
         character_reference_in_data_state,
         RCDATA_state,
         character_reference_in_RCDATA_state,

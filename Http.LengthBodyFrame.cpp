@@ -2,7 +2,6 @@
 
 #include "stdafx.h"
 #include "Http.LengthBodyFrame.h"
-#include "Basic.Event.h"
 
 namespace Http
 {
@@ -20,46 +19,28 @@ namespace Http
         bytes_expected(bytes_expected),
         bytes_received(0)
     {
-        if (this->bytes_expected == 0)
-            switch_to_state(State::done_state);
     }
 
     void LengthBodyFrame::reset(uint32 bytes_expected)
     {
-        __super::reset();
-
         this->bytes_expected = bytes_expected;
         this->bytes_received = 0;
-
-        if (this->bytes_expected == 0)
-            switch_to_state(State::done_state);
     }
 
-    void LengthBodyFrame::consider_event(IEvent* event)
+    bool LengthBodyFrame::write_elements(ElementSource<byte>* element_source)
     {
-        switch (get_state())
-        {
-        case State::receiving_body_state:
-            {
-                const byte* elements;
-                uint32 useable;
+        const byte* elements;
+        uint32 count;
 
-                Event::Read(event, this->bytes_expected - this->bytes_received, &elements, &useable);
+        element_source->Read(this->bytes_expected - this->bytes_received, &elements, &count);
 
-                this->body_stream->write_elements(elements, useable);
+        this->body_stream->write_elements(elements, count);
 
-                this->bytes_received += useable;
+        this->bytes_received += count;
 
-                if (this->bytes_received == this->bytes_expected)
-                {
-                    switch_to_state(State::done_state);
-                    return;
-                }
-            }
-            break;
+        if (this->bytes_received != this->bytes_expected)
+            return false;
 
-        default:
-            throw FatalError("Http::LengthBodyFrame::handle_event unexpected state");
-        }
+        return true;
     }
 }

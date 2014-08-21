@@ -5,7 +5,6 @@
 #include "Json.Globals.h"
 #include "Basic.StreamFrame.h"
 #include "Basic.Globals.h"
-#include "Basic.Event.h"
 
 namespace Json
 {

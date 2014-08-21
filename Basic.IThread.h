@@ -4,8 +4,8 @@
 
 namespace Basic
 {
-    __interface IEvent
+    __interface IThread
     {
-        uint32 get_type();
+        bool thread();
     };
 }

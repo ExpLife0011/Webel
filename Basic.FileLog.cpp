@@ -90,7 +90,7 @@ namespace Basic
         this->file = INVALID_HANDLE_VALUE;
     }
 
-    void FileLog::complete(std::shared_ptr<void> context, uint32 count, uint32 error)
+    void FileLog::job_completed(std::shared_ptr<void> context, uint32 count, uint32 error)
     {
         if (error != ERROR_SUCCESS)
         {

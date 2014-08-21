@@ -64,34 +64,6 @@ namespace Http
 
     typedef std::vector<std::shared_ptr<Cookie> > CookieList;
 
-    enum EventType
-    {
-        response_headers_event = 0x1000,
-        response_complete_event,
-        accept_complete_event,
-    };
-
-    struct ResponseHeadersEvent : public IEvent
-    {
-        ByteStringRef cookie;
-
-        virtual uint32 get_type();
-    };
-
-    struct ResponseCompleteEvent : public IEvent
-    {
-        ByteStringRef cookie;
-
-        virtual uint32 get_type();
-    };
-
-    struct AcceptCompleteEvent : public IEvent
-    {
-        ByteStringRef cookie;
-
-        virtual uint32 get_type();
-    };
-
     ///////////////////////////////////////////////////////////////////////////
     // serialization meta template
     ///////////////////////////////////////////////////////////////////////////

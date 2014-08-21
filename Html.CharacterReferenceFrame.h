@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "Basic.Frame.h"
 #include "Html.Types.h"
 #include "Html.CharacterToken.h"
 #include "Basic.INumberStream.h"

@@ -5,7 +5,7 @@
 
 namespace Basic
 {
-    Job::Job(std::shared_ptr<ICompleter> completer, std::shared_ptr<void> context)
+    Job::Job(std::shared_ptr<IJobEventHandler> event_handler, std::shared_ptr<void> context)
     {
         this->hEvent = 0;
         this->Internal = 0;
@@ -13,13 +13,13 @@ namespace Basic
         this->Offset = 0;
         this->OffsetHigh = 0;
 
-        this->completer = completer;
+        this->event_handler = event_handler;
         this->context = context;
     }
 
-    std::shared_ptr<Job> Job::make(std::shared_ptr<ICompleter> completer, std::shared_ptr<void> context)
+    std::shared_ptr<Job> Job::make(std::shared_ptr<IJobEventHandler> event_handler, std::shared_ptr<void> context)
     {
-        std::shared_ptr<Job> job = std::make_shared<Job>(completer, context);
+        std::shared_ptr<Job> job = std::make_shared<Job>(event_handler, context);
         job->self = job->shared_from_this();
         return job;
     }
@@ -32,11 +32,11 @@ namespace Basic
 
     void Job::complete(uint32 count, uint32 error)
     {
-        std::shared_ptr<ICompleter> completer = this->completer.lock();
+        std::shared_ptr<IJobEventHandler> event_handler = this->event_handler.lock();
 
-        if (completer.get() != 0)
+        if (event_handler.get() != 0)
         {
-            completer->complete(this->context, count, error);
+            event_handler->job_completed(this->context, count, error);
         }
 
         this->context.reset();

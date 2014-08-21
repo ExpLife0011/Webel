@@ -42,13 +42,16 @@ namespace Service
 {
     Globals* globals = 0;
 
-    __declspec(thread) Basic::IStream<Codepoint>* debug_stream = 0;
-    __declspec(thread) Basic::TextWriter* debug_writer = 0;
-
     DWORD WINAPI Globals::Thread(void* param)
     {
-        Globals* process = reinterpret_cast<Globals*>(param);
-        bool success = process->Thread();
+        Basic::globals->LogStream()->logs.push_back(Service::globals->console_log);
+        Basic::globals->LogStream()->logs.push_back(Service::globals->debug_log);
+        Basic::globals->LogStream()->logs.push_back(Service::globals->memory_log);
+        Basic::globals->LogStream()->logs.push_back(Service::globals->tail_log);
+        Basic::globals->LogStream()->logs.push_back(Service::globals->file_log);
+
+        IThread* process = reinterpret_cast<IThread*>(param);
+        bool success = process->thread();
         if (!success)
             return ERROR_ERRORS_ENCOUNTERED;
 
@@ -143,13 +146,13 @@ namespace Service
         initialize_unicode(&root_question, "question");
         initialize_unicode(&root_log, "log");
 
-        DebugWriter()->WriteLine("initializing io completion port");
+        TextWriter(Basic::globals->LogStream()).write_line("initializing io completion port");
 
         this->queue = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
         if (this->queue == 0)
             return Basic::globals->HandleError("CreateIoCompletionPort", GetLastError());
 
-        DebugWriter()->WriteLine("initializing log file");
+        TextWriter(Basic::globals->LogStream()).write_line("initializing log file");
 
         char log_path[MAX_PATH + 0x100];
         GetFilePath("service.log", log_path);
@@ -157,24 +160,30 @@ namespace Service
         this->file_log = std::make_shared<Basic::FileLog>();
         this->file_log->Initialize(log_path);
 
-        DebugWriter()->WriteLine("initializing stop event");
+        Basic::globals->LogStream()->logs.push_back(this->file_log);
+
+        TextWriter(Basic::globals->LogStream()).write_line("initializing stop event");
 
         this->stopEvent = CreateEvent(0, TRUE, FALSE, 0);
         if (this->stopEvent == 0)
             return Basic::globals->HandleError("CreateEvent", GetLastError());
 
-        DebugWriter()->WriteLine("initializing console");
+        TextWriter(Basic::globals->LogStream()).write_line("initializing console");
 
         this->console = std::make_shared<Basic::Console>();
-        this->console->Initialize(std::make_shared<AdminProtocol>(this->console), &this->consoleThread);
+        this->console->Initialize(std::make_shared<AdminProtocol>(this->console));
 
-        DebugWriter()->WriteLine("initializing socket library");
+        this->consoleThread = ::CreateThread(0, 0, Thread, (IThread*)this->console.get(), 0, 0);
+        if (this->consoleThread == 0)
+            throw FatalError("CreateThread", GetLastError());
+
+        TextWriter(Basic::globals->LogStream()).write_line("initializing socket library");
 
         bool success = Basic::globals->InitializeSocketApi();
         if (!success)
             return false;
 
-        DebugWriter()->WriteLine("initializing certificate");
+        TextWriter(Basic::globals->LogStream()).write_line("initializing certificate");
 
         if (!Service::globals->certificate_file_name.empty())
         {
@@ -202,8 +211,8 @@ namespace Service
         char pfx_path[MAX_PATH + 0x100];
         GetFilePath(Service::globals->certificate_file_name.c_str(), pfx_path);
 
-        DebugWriter()->write_literal("reading ");
-        DebugWriter()->WriteLine(pfx_path);
+        TextWriter(Basic::globals->LogStream()).write_literal("reading ");
+        TextWriter(Basic::globals->LogStream()).write_line(pfx_path);
 
         this->pfx_file = ::CreateFileA(
             pfx_path,
@@ -216,7 +225,7 @@ namespace Service
         if (this->pfx_file == INVALID_HANDLE_VALUE)
             return Basic::globals->HandleError("CreateFileA", GetLastError());
 
-        HANDLE result = CreateIoCompletionPort(this->pfx_file, this->queue, reinterpret_cast<ULONG_PTR>(static_cast<ICompleter*>(this)), 0);
+        HANDLE result = CreateIoCompletionPort(this->pfx_file, this->queue, reinterpret_cast<ULONG_PTR>(static_cast<IJobEventHandler*>(this)), 0);
         if (result == 0)
             return Basic::globals->HandleError("CreateIoCompletionPort", GetLastError());
 
@@ -254,7 +263,7 @@ namespace Service
 
     void Globals::Cleanup()
     {
-        DebugWriter()->WriteLine("exiting");
+        TextWriter(Basic::globals->LogStream()).write_line("exiting");
 
         WaitForMultipleObjectsEx(threads.size(), &threads.front(), true, 30000, false);
 
@@ -271,7 +280,7 @@ namespace Service
             Basic::globals->HandleError("WSACleanup", WSAGetLastError());
     }
 
-    void Globals::complete(std::shared_ptr<void> context, uint32 count, uint32 error)
+    void Globals::job_completed(std::shared_ptr<void> context, uint32 count, uint32 error)
     {
         std::shared_ptr<ByteString> bytes = std::static_pointer_cast<ByteString>(context);
 
@@ -312,7 +321,7 @@ namespace Service
         this->certificates[0].resize(this->cert->cbCertEncoded);
         CopyMemory(this->certificates[0].address(), this->cert->pbCertEncoded, this->cert->cbCertEncoded);
 
-        DebugWriter()->WriteLine("initializing encodings");
+        TextWriter(Basic::globals->LogStream()).write_line("initializing encodings");
 
         switch_to_state(State::encodings_pending_state);
 
@@ -332,8 +341,8 @@ namespace Service
         x_500 = "CN=";
         x_500 += this->self_sign_domain;
 
-        DebugWriter()->write_literal("creating transient self-sign certificate ");
-        DebugWriter()->WriteLine(x_500.c_str());
+        TextWriter(Basic::globals->LogStream()).write_literal("creating transient self-sign certificate ");
+        TextWriter(Basic::globals->LogStream()).write_line(x_500.c_str());
 
         bool success = (bool)CertStrToNameA(X509_ASN_ENCODING, x_500.c_str(), 0, 0, name, &count, 0);
         if (!success)
@@ -361,7 +370,7 @@ namespace Service
 
         bytes->resize(count);
 
-        DebugWriter()->WriteLine("initializing certificate from file");
+        TextWriter(Basic::globals->LogStream()).write_line("initializing certificate from file");
 
         CRYPT_DATA_BLOB pfx_blob;
         pfx_blob.pbData = bytes->address();
@@ -394,7 +403,7 @@ namespace Service
                     throw Yield("unexpected event");
                 }
 
-                DebugWriter()->WriteLine("initializing html globals");
+                TextWriter(Basic::globals->LogStream()).write_line("initializing html globals");
 
                 std::shared_ptr<HtmlNamedCharacterReferences> named_characters = std::make_shared<HtmlNamedCharacterReferences>(this->shared_from_this(), ByteStringRef());
                 named_characters->start();
@@ -408,7 +417,7 @@ namespace Service
                 if (event->get_type() != Service::EventType::characters_complete_event)
                     throw Yield("unexepected event");
 
-                DebugWriter()->WriteLine("initializing endpoints");
+                TextWriter(Basic::globals->LogStream()).write_line("initializing endpoints");
 
                 this->http_endpoint = std::make_shared<WebServerEndpoint>(Basic::ListenSocket::Face_Default, 81, std::shared_ptr<Tls::ICertificate>());
                 this->http_endpoint->SpawnListeners(20);
@@ -434,7 +443,7 @@ namespace Service
 
     bool Globals::SetThreadCount(uint32 count)
     {
-        DebugWriter()->WriteLine("initializing threads");
+        TextWriter(Basic::globals->LogStream()).write_line("initializing threads");
 
         if (count == 0)
         {
@@ -446,7 +455,7 @@ namespace Service
 
         for (uint32 i = 0; i < count; i++)
         {
-            HANDLE thread = CreateThread(0, 0, Thread, static_cast<Globals*>(this), 0, 0);
+            HANDLE thread = CreateThread(0, 0, Thread, static_cast<IThread*>(this), 0, 0);
             if (thread == 0)
                 return Basic::globals->HandleError("CreateThread", GetLastError());
 
@@ -465,7 +474,7 @@ namespace Service
         return true;
     }
 
-    bool Globals::Thread()
+    bool Globals::thread()
     {
         while (true)
         {
@@ -549,41 +558,6 @@ namespace Service
     {
         return &this->certificates;
     }
-
-    Basic::IStream<Codepoint>* Globals::LogStream()
-    {
-        if (debug_stream == 0)
-        {
-            Basic::LogStream* log_stream = new Basic::LogStream();
-            log_stream->logs.push_back(this->console_log);
-            log_stream->logs.push_back(this->debug_log);
-            log_stream->logs.push_back(this->file_log);
-            log_stream->logs.push_back(this->memory_log);
-            log_stream->logs.push_back(this->tail_log);
-
-            debug_stream = log_stream;
-        }
-
-        return debug_stream;
-    }
-
-    Basic::TextWriter* Globals::DebugWriter()
-    {
-        if (debug_writer == 0)
-            debug_writer = new Basic::TextWriter(LogStream());
-
-        return debug_writer;
-    }
-
-    bool Globals::HandleError(const char* context, uint32 error)
-    {
-        DebugWriter()->write_literal("ERROR: ");
-        DebugWriter()->write_c_str(context);
-        DebugWriter()->write_literal(" code=");
-        DebugWriter()->WriteError(error);
-        DebugWriter()->WriteLine();
-        return false;
-    }
 }
 
 SERVICE_STATUS service_status = {0};
@@ -605,7 +579,7 @@ void __stdcall ServiceProc(DWORD, char**)
     service_status_handle = RegisterServiceCtrlHandlerA(Service::globals->service_name.c_str(), ServiceHandlerProc);
     if (service_status_handle == 0)
     {
-        Service::globals->HandleError("RegisterServiceCtrlHandler", GetLastError());
+        Basic::globals->HandleError("RegisterServiceCtrlHandler", GetLastError());
         return;
     }
 
@@ -641,14 +615,19 @@ void __stdcall ServiceProc(DWORD, char**)
 
 int main(int argc, char* argv[])
 {
-    // must be constructed first because Basic::globals needs it, and we set some variables from the command line parameters
+    // must be constructed first because Basic::globals needs the completion queue, and we set some variables from the command line parameters
     std::shared_ptr<Service::Globals> service_global_ref;
     make_immortal<Service::Globals>(&Service::globals, &service_global_ref);
 
     // must be initialized next so that error handling and ascii encoding are initialized
     make_immortal<Basic::Globals>(&Basic::globals, 0);
 
-    Basic::globals->Initialize(service_global_ref, service_global_ref);
+    Basic::globals->LogStream()->logs.push_back(service_global_ref->console_log);
+    Basic::globals->LogStream()->logs.push_back(service_global_ref->debug_log);
+    Basic::globals->LogStream()->logs.push_back(service_global_ref->memory_log);
+    Basic::globals->LogStream()->logs.push_back(service_global_ref->tail_log);
+
+    Basic::globals->Initialize(service_global_ref);
 
     if (argc == 3 && (0 == _stricmp(argv[1], "/u") || 0 == _stricmp(argv[1], "/uninstall")))
     {
@@ -656,14 +635,14 @@ int main(int argc, char* argv[])
 
         SC_HANDLE sc_manager = ::OpenSCManagerA(0, 0, GENERIC_READ | GENERIC_WRITE);
         if (sc_manager == 0)
-            return Service::globals->HandleError("OpenSCManagerA", GetLastError());
+            return Basic::globals->HandleError("OpenSCManagerA", GetLastError());
 
         SC_HANDLE service = ::OpenServiceA(sc_manager, Service::globals->service_name.c_str(), SERVICE_QUERY_CONFIG);
         if (service != 0)
         {
             bool success = (bool)::DeleteService(service);
             if (!success)
-                return Service::globals->HandleError("DeleteService", GetLastError());
+                return Basic::globals->HandleError("DeleteService", GetLastError());
 
             ::CloseServiceHandle(service);
         }
@@ -696,7 +675,7 @@ int main(int argc, char* argv[])
 
             DWORD count = GetModuleFileNameA(0, exe_path, sizeof(exe_path));
             if (count == sizeof(exe_path))
-                return Service::globals->HandleError("GetModuleFileNameA", GetLastError());
+                return Basic::globals->HandleError("GetModuleFileNameA", GetLastError());
 
             strcat_s(exe_path, " /service \"");
             strcat_s(exe_path, argv[2]);
@@ -713,7 +692,7 @@ int main(int argc, char* argv[])
 
             SC_HANDLE sc_manager = ::OpenSCManagerA(0, 0, GENERIC_READ | GENERIC_WRITE);
             if (sc_manager == 0)
-                return Service::globals->HandleError("OpenSCManagerA", GetLastError());
+                return Basic::globals->HandleError("OpenSCManagerA", GetLastError());
 
             SC_HANDLE service = ::OpenServiceA(sc_manager, Service::globals->service_name.c_str(), SERVICE_QUERY_CONFIG);
             if (service == 0)
@@ -733,7 +712,7 @@ int main(int argc, char* argv[])
                     0,
                     0);
                 if (service == 0)
-                    return Service::globals->HandleError("CreateServiceA", GetLastError());
+                    return Basic::globals->HandleError("CreateServiceA", GetLastError());
             }
 
             ::CloseServiceHandle(service);
@@ -760,7 +739,7 @@ int main(int argc, char* argv[])
 
             bool success = StartServiceCtrlDispatcherA(service_entry);
             if (!success)
-                return Service::globals->HandleError("StartServiceCtrlDispatcherA", GetLastError());
+                return Basic::globals->HandleError("StartServiceCtrlDispatcherA", GetLastError());
 
             return 0;
         }

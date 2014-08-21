@@ -7,8 +7,8 @@
 
 namespace Basic
 {
-    ConnectedSocket::ConnectedSocket(std::shared_ptr<IProcess> protocol, uint32 receive_buffer_size) :
-        protocol(protocol),
+    ConnectedSocket::ConnectedSocket(std::shared_ptr<ITransportEventHandler<byte> > event_handler, uint32 receive_buffer_size) :
+        event_handler(event_handler),
         receive_buffer_size(receive_buffer_size)
     {
     }
@@ -21,7 +21,7 @@ namespace Basic
         id->reserve(0x40);
 
         TextWriter text(id.get());
-        text.WriteFormat<0x40>(
+        text.write_format<0x40>(
             "%d.%d.%d.%d:%d",
             this->remoteAddress.sin_addr.S_un.S_un_b.s_b1,
             this->remoteAddress.sin_addr.S_un.S_un_b.s_b2,
@@ -42,21 +42,14 @@ namespace Basic
             }
             else
             {
-                std::shared_ptr<IProcess> protocol = this->protocol.lock();
-                if (protocol.get() == 0)
+                std::shared_ptr<ITransportEventHandler<byte> > event_handler = this->event_handler.lock();
+                if (event_handler.get() == 0)
                 {
-                    Disconnect(0);
+                    Disconnect();
                     return;
                 }
 
-                this->protocol_element_source.Initialize(bytes->address(), bytes->size());
-
-                ReadyForReadBytesEvent event;
-                event.Initialize(&this->protocol_element_source);
-                produce_event(protocol.get(), &event);
-
-                if (!this->protocol_element_source.Exhausted() && !protocol->failed())
-                    throw FatalError("Basic::ReadyForReadBytesEvent::Consume this->elements_read < this->count");
+                event_handler->transport_received(bytes->address(), bytes->size());
             }
         }
     }
@@ -88,17 +81,16 @@ namespace Basic
 
     void ConnectedSocket::DisconnectAndNotifyProtocol()
     {
-        std::shared_ptr<IProcess> protocol;
-        Disconnect(&protocol);
+        Disconnect();
 
-        if (protocol.get() != 0)
+        std::shared_ptr<ITransportEventHandler<byte> > event_handler = this->event_handler.lock();
+        if (event_handler.get() != 0)
         {
-            ElementStreamEndingEvent event;
-            produce_event(protocol.get(), &event);
+            event_handler->transport_disconnected();
         }
     }
 
-    void ConnectedSocket::Disconnect(std::shared_ptr<IProcess>* protocol)
+    void ConnectedSocket::Disconnect()
     {
         if (socket != INVALID_SOCKET)
         {
@@ -107,11 +99,6 @@ namespace Basic
 
             socket = INVALID_SOCKET;
         }
-
-        if (protocol != 0)
-            (*protocol) = this->protocol.lock();
-
-        this->protocol.reset();
     }
 
     void ConnectedSocket::write_elements(const byte* elements, uint32 count)
@@ -195,6 +182,6 @@ namespace Basic
 
     void ConnectedSocket::CompleteDisconnect()
     {
-        Disconnect(0);
+        Disconnect();
     }
 }

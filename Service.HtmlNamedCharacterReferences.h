@@ -3,13 +3,13 @@
 #pragma once
 
 #include "Web.Client.h"
-#include "Basic.Frame.h"
 #include "Json.Parser.h"
 
 namespace Service
 {
     using namespace Basic;
 
+    // $$$ should be a persistent object
     class HtmlNamedCharacterReferences : public Frame, public std::enable_shared_from_this<HtmlNamedCharacterReferences>
     {
     private:

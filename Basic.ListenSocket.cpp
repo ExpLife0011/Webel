@@ -37,8 +37,8 @@ namespace Basic
         if (error == SOCKET_ERROR)
             throw FatalError("listen", WSAGetLastError());
 
-        Basic::globals->DebugWriter()->WriteFormat<0x40>("listening on port %d", port);
-        Basic::globals->DebugWriter()->WriteLine();
+        TextWriter(Basic::globals->LogStream()).write_format<0x40>("listening on port %d", port);
+        TextWriter(Basic::globals->LogStream()).write_line();
     }
 
     void ListenSocket::start_accept(std::shared_ptr<ServerSocket> server_socket, bool receive_with_connect)

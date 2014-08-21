@@ -3,7 +3,6 @@
 #pragma once
 
 #include "Basic.IStream.h"
-#include "Basic.Frame.h"
 #include "Json.Types.h"
 #include "Json.ScriptFrame.h"
 

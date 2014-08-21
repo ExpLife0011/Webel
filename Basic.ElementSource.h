@@ -2,15 +2,13 @@
 
 #pragma once
 
-#include "Basic.IElementSource.h"
 #include "Basic.Globals.h"
-#include "Basic.Frame.h"
 
 namespace Basic
 {
-    // $$ get rid of this class?
+    // $$$ get rid of this class?
     template <class T>
-    class ElementSource : public IElementSource<T>
+    class ElementSource
     {
     private:
         typedef std::shared_ptr<IStream<T> > StreamRef;
@@ -67,7 +65,7 @@ namespace Basic
             uint32 elements_remaining = this->count - this->elements_read;
 
             if (elements_remaining == 0)
-                throw Yield("event consumed");
+                throw FatalError("Basic::ElementSource::Read elements_remaining == 0");
 
             const T* return_address = this->elements + this->elements_read;
             uint32 return_count = (elements_remaining < count) ? elements_remaining : count;
@@ -80,17 +78,19 @@ namespace Basic
             (*out_count) = return_count;
         }
 
-        void ReadNext(T* element)
+        bool ReadNext(T* element)
         {
             uint32 elements_remaining = this->count - this->elements_read;
 
             if (elements_remaining == 0)
-                throw Yield("event consumed");
+                return false;
 
             (*element) = this->elements[this->elements_read];
             this->elements_read++;
 
             Observe();
+
+            return true;
         }
 
         void AddObserver(std::shared_ptr<IStream<T> > stream)

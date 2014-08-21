@@ -1,7 +1,6 @@
 // Copyright © 2013 Brian Spanton
 
 #include "stdafx.h"
-#include "Basic.Event.h"
 #include "Http.ResponseHeadersFrame.h"
 #include "Basic.Globals.h"
 #include "Http.Globals.h"
@@ -19,15 +18,12 @@ namespace Http
     {
     }
 
-    void ResponseHeadersFrame::consider_event(IEvent* event)
+    void ResponseHeadersFrame::write_element(byte b)
     {
         switch (get_state())
         {
         case State::receiving_protocol_state:
             {
-                byte b;
-                Event::ReadNext(event, &b);
-
                 if (b == Http::globals->SP)
                 {
                     switch_to_state(State::receiving_code_state);
@@ -41,9 +37,6 @@ namespace Http
 
         case State::receiving_code_state:
             {
-                byte b;
-                Event::ReadNext(event, &b);
-
                 if (b == Http::globals->SP)
                 {
                     if (this->number_stream.get_digit_count() == 0 || this->response->code < 100 || this->response->code > 599)
@@ -72,9 +65,6 @@ namespace Http
 
         case State::receiving_reason_state:
             {
-                byte b;
-                Event::ReadNext(event, &b);
-
                 if (b == Http::globals->CR)
                 {
                     switch_to_state(State::expecting_LF_after_reason_state);
@@ -96,9 +86,6 @@ namespace Http
 
         case State::expecting_LF_after_reason_state:
             {
-                byte b;
-                Event::ReadNext(event, &b);
-
                 if (b == Http::globals->LF)
                 {
                     switch_to_state(State::headers_frame_pending_state);
@@ -112,7 +99,16 @@ namespace Http
 
         case State::headers_frame_pending_state:
             {
-                delegate_event_change_state_on_fail(&this->headers_frame, event, State::headers_frame_failed);
+                this->headers_frame.write_element(b);
+
+                if (this->headers_frame.in_progress())
+                    return;
+
+                if (this->headers_frame.failed())
+                {
+                    switch_to_state(State::headers_frame_failed);
+                    return;
+                }
 
                 switch_to_state(State::done_state);
             }
@@ -132,7 +128,7 @@ namespace Http
 
         UnicodeString code;
         TextWriter writer(&code);
-        writer.WriteFormat<0x10>("%d", value->code);
+        writer.write_format<0x10>("%d", value->code);
 
         stream->write_element(Http::globals->SP);
         code.write_to_stream(&encoder);

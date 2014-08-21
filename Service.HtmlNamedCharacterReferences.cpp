@@ -55,7 +55,7 @@ namespace Service
                         this->client->get_url(&url);
 
                         url->write_to_stream(Basic::globals->LogStream(), 0, 0);
-                        Basic::globals->DebugWriter()->WriteLine(" did not return 200");
+                        TextWriter(Basic::globals->LogStream()).write_line(" did not return 200");
 
                         switch_to_state(State::done_state);
                         return;
@@ -127,7 +127,7 @@ namespace Service
                         Html::globals->named_character_references_table->emplace(std::move(value));
                     }
 
-                    Basic::globals->DebugWriter()->WriteFormat<0x100>("Recognized %d HTML named character references\n", Html::globals->named_character_references_table->size());
+                    TextWriter(Basic::globals->LogStream()).write_format<0x100>("Recognized %d HTML named character references\n", Html::globals->named_character_references_table->size());
 
                     std::shared_ptr<IProcess> completion = this->completion.lock();
                     if (completion.get() != 0)

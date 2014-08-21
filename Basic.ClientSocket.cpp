@@ -3,12 +3,11 @@
 #include "stdafx.h"
 #include "Basic.ClientSocket.h"
 #include "Basic.Globals.h"
-#include "Basic.Event.h"
 
 namespace Basic
 {
-    ClientSocket::ClientSocket(std::shared_ptr<IProcess> protocol, uint32 receive_buffer_size) :
-        ConnectedSocket(protocol, receive_buffer_size),
+    ClientSocket::ClientSocket(std::shared_ptr<ITransportEventHandler<byte> > event_handler, uint32 receive_buffer_size) :
+        ConnectedSocket(event_handler, receive_buffer_size),
         state(State::new_state)
     {
     }
@@ -72,20 +71,18 @@ namespace Basic
 
         InitializePeer(&remoteAddress);
 
-        std::shared_ptr<SocketJobContext> job_context = std::make_shared<SocketJobContext>(SocketJobContext::ready_for_send_type);
+        std::shared_ptr<SocketJobContext> job_context = std::make_shared<SocketJobContext>(SocketJobContext::connect_type);
         std::shared_ptr<Job> job = Job::make(this->shared_from_this(), job_context);
 
         Basic::globals->QueueJob(job);
     }
 
-    void ClientSocket::CompleteReadyForSend()
+    void ClientSocket::CompleteConnect()
     {
-        std::shared_ptr<IProcess> protocol = this->protocol.lock();
-        if (protocol.get() != 0)
+        std::shared_ptr<ITransportEventHandler<byte> > event_handler = this->event_handler.lock();
+        if (event_handler.get() != 0)
         {
-            ReadyForWriteBytesEvent event;
-            event.Initialize(&this->protocol_element_source);
-            produce_event(protocol.get(), &event);
+            event_handler->transport_connected();
         }
     }
 

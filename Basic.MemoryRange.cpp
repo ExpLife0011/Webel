@@ -3,8 +3,6 @@
 #include "stdafx.h"
 #include "Basic.MemoryRange.h"
 #include "Basic.Globals.h"
-#include "Basic.Event.h"
-#include "Basic.Frame.h"
 
 namespace Basic
 {
@@ -37,31 +35,6 @@ namespace Basic
 
         CopyMemory(this->bytes + this->received, elements, received);
         this->received += received;
-    }
-
-    void MemoryRange::write_element(byte element)
-    {
-        if (this->count == this->received)
-            throw FatalError("MemoryRange::write_elements this->count == this->received");
-
-        this->bytes[this->received] = element;
-        this->received += 1;
-    }
-
-    void MemoryRange::write_eof()
-    {
-        HandleError("unexpected eof");
-    }
-
-    void MemoryRange::consider_event(IEvent* event)
-    {
-        const byte* elements;
-        uint32 useable;
-
-        Event::Read(event, this->count - this->received, &elements, &useable);
-
-        CopyMemory(this->bytes + this->received, elements, useable);
-        this->received += useable;
     }
 
     uint32 MemoryRange::Length()

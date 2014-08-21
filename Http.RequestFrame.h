@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "Basic.IProcess.h"
 #include "Http.Types.h"
 #include "Http.BodyFrame.h"
 #include "Basic.SingleByteDecoder.h"

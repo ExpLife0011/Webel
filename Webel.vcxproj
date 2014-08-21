@@ -96,14 +96,20 @@
   <ItemGroup>
     <ClInclude Include="Basic.ConsoleLog.h" />
     <ClInclude Include="Basic.DebugLog.h" />
+    <ClInclude Include="Basic.ITransportEventHandler.h" />
     <ClInclude Include="Basic.ILog.h" />
+    <ClInclude Include="Basic.IThread.h" />
+    <ClInclude Include="Basic.LogFrame.h" />
     <ClInclude Include="Basic.LogStream.h" />
     <ClInclude Include="Basic.ElementSource.h" />
     <ClInclude Include="Basic.IStreamWriter.h" />
     <ClInclude Include="Basic.MemoryLog.h" />
+    <ClInclude Include="Basic.Path.h" />
+    <ClInclude Include="Basic.StateMachine.h" />
     <ClInclude Include="Basic.TailLog.h" />
     <ClInclude Include="Ftp.Globals.h" />
     <ClInclude Include="Ftp.Server.h" />
+    <ClInclude Include="Service.User.h" />
     <ClInclude Include="Scrape.Amazon.h" />
     <ClInclude Include="Scrape.Globals.h" />
     <ClInclude Include="Scrape.Netflix.h" />
@@ -120,16 +126,10 @@
     <ClInclude Include="Tls.ICertificate.h" />
     <ClInclude Include="Basic.ICompletionQueue.h" />
     <ClInclude Include="Basic.IDecoderFactory.h" />
-    <ClInclude Include="Basic.IElementSource.h" />
-    <ClInclude Include="Basic.Event.h" />
-    <ClInclude Include="Basic.Frame.h" />
-    <ClInclude Include="Basic.FrameStream.h" />
     <ClInclude Include="Basic.Globals.h" />
     <ClInclude Include="Basic.IDecoder.h" />
     <ClInclude Include="Basic.IEncoder.h" />
     <ClInclude Include="Basic.IEncoderFactory.h" />
-    <ClInclude Include="Basic.IErrorHandler.h" />
-    <ClInclude Include="Basic.IEvent.h" />
     <ClInclude Include="Basic.INumberStream.h" />
     <ClInclude Include="Basic.ISingleByteEncodingIndex.h" />
     <ClInclude Include="Basic.MatchFrame.h" />
@@ -146,8 +146,7 @@
     <ClInclude Include="Basic.HashStream.h" />
     <ClInclude Include="Basic.HexNumberStream.h" />
     <ClInclude Include="Basic.Hold.h" />
-    <ClInclude Include="Basic.ICompleter.h" />
-    <ClInclude Include="Basic.IProcess.h" />
+    <ClInclude Include="Basic.IJobEventHandler.h" />
     <ClInclude Include="Basic.IStream.h" />
     <ClInclude Include="Basic.ListenSocket.h" />
     <ClInclude Include="Basic.Lock.h" />
@@ -197,6 +196,7 @@
     <ClInclude Include="Basic.Uri.h" />
     <ClInclude Include="Service.Globals.h" />
     <ClInclude Include="Web.Globals.h" />
+    <ClInclude Include="Web.IClientEventHandler.h" />
     <ClInclude Include="Web.Proxy.h" />
     <ClInclude Include="Json.ArrayFrame.h" />
     <ClInclude Include="Json.ByteStreamDecoder.h" />
@@ -210,7 +210,6 @@
     <ClInclude Include="Json.Text.h" />
     <ClInclude Include="Http.BodyFrame.h" />
     <ClInclude Include="Http.LengthBodyFrame.h" />
-    <ClInclude Include="Http.DisconnectBodyFrame.h" />
     <ClInclude Include="Http.Types.h" />
     <ClInclude Include="Http.HeadersFrame.h" />
     <ClInclude Include="Web.Server.h" />
@@ -255,15 +254,15 @@
   <ItemGroup>
     <ClCompile Include="Basic.ConsoleLog.cpp" />
     <ClCompile Include="Basic.DebugLog.cpp" />
+    <ClCompile Include="Basic.LogFrame.cpp" />
     <ClCompile Include="Basic.LogStream.cpp" />
-    <ClCompile Include="Basic.Event.cpp" />
-    <ClCompile Include="Basic.Frame.cpp" />
-    <ClCompile Include="Basic.FrameStream.cpp" />
     <ClCompile Include="Basic.Globals.cpp" />
     <ClCompile Include="Basic.MemoryLog.cpp" />
+    <ClCompile Include="Basic.Path.cpp" />
     <ClCompile Include="Basic.SingleByteDecoder.cpp" />
     <ClCompile Include="Basic.SingleByteEncoder.cpp" />
     <ClCompile Include="Basic.SingleByteEncodingIndex.cpp" />
+    <ClCompile Include="Basic.StateMachine.cpp" />
     <ClCompile Include="Basic.String.cpp" />
     <ClCompile Include="Basic.TailLog.cpp" />
     <ClCompile Include="Basic.Types.cpp" />
@@ -321,9 +320,9 @@
     <ClCompile Include="Basic.ClientSocket.cpp" />
     <ClCompile Include="Basic.ConnectedSocket.cpp" />
     <ClCompile Include="Basic.CountStream.cpp" />
-    <ClCompile Include="Http.DisconnectBodyFrame.cpp" />
     <ClCompile Include="Http.BodyFrame.cpp" />
     <ClCompile Include="Service.WebServerEndpoint.cpp" />
+    <ClCompile Include="Service.User.cpp" />
     <ClCompile Include="Tls.HeartbeatExtensionFrame.cpp" />
     <ClCompile Include="Tls.HeartbeatMessageFrame.cpp" />
     <ClCompile Include="Tls.HeartbeatProtocol.cpp" />

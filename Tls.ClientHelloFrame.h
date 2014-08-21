@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "Basic.IProcess.h"
 #include "Basic.CountStream.h"
 #include "Basic.IgnoreFrame.h"
 #include "Tls.Types.h"

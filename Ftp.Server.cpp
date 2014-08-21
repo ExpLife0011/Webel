@@ -4,13 +4,12 @@
 #include "Ftp.Server.h"
 #include "Http.Types.h"
 #include "Ftp.Globals.h"
-#include "Basic.Event.h"
 
 namespace Ftp
 {
     using namespace Basic;
 
-    Server::Server(std::shared_ptr<IProcess> completion, ByteStringRef cookie) :
+    Server::Server(std::shared_ptr<IServerCompletion> completion, ByteStringRef cookie) :
         completion(completion),
         completion_cookie(cookie),
         command_frame(&this->command) // initialization is in order of declaration in class def
@@ -36,14 +35,14 @@ namespace Ftp
         }
     }
 
-    void Server::consider_event(IEvent* event)
+    void Server::consider_event(void* event)
     {
         switch (get_state())
         {
         case State::pending_connection_state:
             if (event->get_type() == Basic::EventType::ready_for_write_bytes_event)
             {
-                Basic::globals->DebugWriter()->WriteLine("accepted");
+                TextWriter(Basic::globals->LogStream()).write_line("accepted");
 
                 std::shared_ptr<IProcess> completion = this->completion.lock();
                 if (completion.get() != 0)

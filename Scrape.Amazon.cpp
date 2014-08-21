@@ -35,7 +35,7 @@ namespace Scrape
 			this->client->get_url(&url);
 
 			url->write_to_stream(Basic::globals->LogStream(), 0, 0);
-			Basic::globals->DebugWriter()->WriteLine(" did not return 200");
+			TextWriter(Basic::globals->LogStream()).write_line(" did not return 200");
 
 			return false;
 		}

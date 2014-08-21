@@ -5,17 +5,19 @@
 #include "Http.ResponseHeadersFrame.h"
 #include "Http.BodyFrame.h"
 #include "Http.MediaType.h"
-#include "Basic.Frame.h"
+#include "Basic.StateMachine.h"
 #include "Basic.Lock.h"
-#include "Basic.ICompleter.h"
+#include "Basic.IJobEventHandler.h"
+#include "Basic.ITransportEventHandler.h"
 #include "Basic.IStream.h"
+#include "Web.IClientEventHandler.h"
 
 namespace Web
 {
     using namespace Basic;
     using namespace Http;
 
-    class Client : public Frame, public ICompleter, public std::enable_shared_from_this<Client>
+    class Client : public StateMachine, public ITransportEventHandler<byte>, public IJobEventHandler, public std::enable_shared_from_this<Client>
     {
     public:
         enum State
@@ -31,8 +33,8 @@ namespace Web
 
     private:
         std::shared_ptr<IStream<byte> > transport;
-        std::weak_ptr<IProcess> completion;
-        ByteStringRef completion_cookie;
+        std::weak_ptr<IClientEventHandler> event_handler;
+        ByteStringRef event_handler_cookie;
         std::shared_ptr<ResponseHeadersFrame> response_headers_frame;
         std::shared_ptr<BodyFrame> response_body_frame;
         std::shared_ptr<MediaType> media_type;
@@ -49,16 +51,20 @@ namespace Web
         void QueuePlanned();
         void QueueJob();
 
-        virtual void IProcess::consider_event(IEvent* event);
+        void consider_event(bool job_completed, bool transport_received, byte element, bool write_elements, const byte* elements, uint32 count, bool write_eof, bool transport_connected);
 
     public:
         TransactionList history;
         CookieList http_cookies;
 
-        void Get(std::shared_ptr<Request> request, uint8 max_retries, std::shared_ptr<IProcess> completion, ByteStringRef cookie);
-        void Get(std::shared_ptr<Uri> url, uint8 max_retries, std::shared_ptr<IProcess> completion, ByteStringRef cookie);
+        void Get(std::shared_ptr<Request> request, uint8 max_retries, std::shared_ptr<IClientEventHandler> event_handler, ByteStringRef event_handler_cookie);
+        void Get(std::shared_ptr<Uri> url, uint8 max_retries, std::shared_ptr<IClientEventHandler> event_handler, ByteStringRef event_handler_cookie);
 
-        virtual void ICompleter::complete(std::shared_ptr<void> context, uint32 count, uint32 error);
+        virtual void IJobEventHandler::job_completed(std::shared_ptr<void> context, uint32 count, uint32 error);
+        virtual void ITransportEventHandler<byte>::write_element(byte element);
+        virtual void ITransportEventHandler<byte>::write_elements(const byte* elements, uint32 count);
+        virtual void ITransportEventHandler<byte>::write_eof();
+        virtual void ITransportEventHandler<byte>::transport_connected();
 
         bool get_content_type(std::shared_ptr<MediaType>* media_type);
         bool get_content_type_charset(UnicodeStringRef* media_type);

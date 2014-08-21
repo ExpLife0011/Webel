@@ -2,7 +2,8 @@
 
 #pragma once
 
-#include "Basic.Frame.h"
+#include "Basic.StateMachine.h"
+#include "Basic.IStream.h"
 #include "Basic.NameValueCollection.h"
 #include "Http.Globals.h"
 
@@ -10,7 +11,7 @@ namespace Http
 {
     using namespace Basic;
 
-    class HeadersFrame : public Frame
+    class HeadersFrame : public StateMachine, public UnitStream<byte>
     {
     private:
         enum State
@@ -36,10 +37,10 @@ namespace Http
         UnicodeStringRef name;
         UnicodeStringRef value;
 
-        virtual void IProcess::consider_event(IEvent* event);
-
     public:
         HeadersFrame(NameValueCollection* nvc);
+
+        virtual void IStream<byte>::write_element(byte element);
     };
 
     template <>

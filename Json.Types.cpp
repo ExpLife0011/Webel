@@ -3,7 +3,6 @@
 #include "stdafx.h"
 #include "Json.Types.h"
 #include "Json.Globals.h"
-#include "Basic.Frame.h"
 
 namespace Json
 {
@@ -75,14 +74,14 @@ namespace Json
             else
             {
                 // $ stream->Indent();
-                writer.WriteLine();
+                writer.write_line();
 
                 for (ValueList::const_iterator it = this->elements.cbegin(); it != this->elements.cend(); it++)
                 {
                     if (it != this->elements.begin())
                     {
                         stream->write_element(Json::globals->value_separator);
-                        writer.WriteLine();
+                        writer.write_line();
                     }
 
                     (*it)->write_to_stream(stream);
@@ -138,14 +137,14 @@ namespace Json
             else
             {
                 // $ stream->Indent();
-                writer.WriteLine();
+                writer.write_line();
 
                 for (MemberList::const_iterator it = this->members.cbegin(); it != this->members.cend(); it++)
                 {
                     if (it != this->members.begin())
                     {
                         stream->write_element(Json::globals->value_separator);
-                        writer.WriteLine();
+                        writer.write_line();
                     }
 
                     Json::String::write_value(it->first, stream);
@@ -167,7 +166,7 @@ namespace Json
         TextWriter writer(stream);
 
         // $ handle exponents and fractions
-        writer.WriteFormat<64>("%d", (uint64)this->value);
+        writer.write_format<64>("%d", (uint64)this->value);
     }
 
     void String::write_to_stream(Basic::IStream<Codepoint>* stream) const

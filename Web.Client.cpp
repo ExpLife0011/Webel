@@ -17,17 +17,17 @@ namespace Web
 {
     using namespace Basic;
 
-    void Client::Get(std::shared_ptr<Uri> url, uint8 max_retries, std::shared_ptr<IProcess> completion, ByteStringRef cookie)
+    void Client::Get(std::shared_ptr<Uri> url, uint8 max_retries, std::shared_ptr<IClientEventHandler> event_handler, ByteStringRef event_handler_cookie)
     {
         std::shared_ptr<Request> request = std::make_shared<Request>();
         request->Initialize();
         request->method = Http::globals->get_method;
         request->resource = url;
 
-        Get(request, max_retries, completion, cookie);
+        Get(request, max_retries, event_handler, event_handler_cookie);
     }
 
-    void Client::Get(std::shared_ptr<Http::Request> request, uint8 max_retries, std::shared_ptr<IProcess> completion, ByteStringRef cookie)
+    void Client::Get(std::shared_ptr<Http::Request> request, uint8 max_retries, std::shared_ptr<IClientEventHandler> event_handler, ByteStringRef event_handler_cookie)
     {
         // $$$ reconsider how threading, eventing, job queueing and locking works with this class
 
@@ -39,8 +39,8 @@ namespace Web
         this->retries = 0;
         this->redirects = 0;
 
-        this->completion = completion;
-        this->completion_cookie = cookie;
+        this->event_handler = event_handler;
+        this->event_handler_cookie = event_handler_cookie;
 
         this->planned_request = request;
         this->max_retries = max_retries;
@@ -48,10 +48,9 @@ namespace Web
         QueuePlanned();
     }
 
-    void Client::complete(std::shared_ptr<void> context, uint32 count, uint32 error)
+    void Client::job_completed(std::shared_ptr<void> context, uint32 count, uint32 error)
     {
-        ProcessEvent event;
-        produce_event(this, &event);
+        consider_event(true, false, false, false, 0, 0, false, false);
     }
 
     void Client::Redirect(std::shared_ptr<Uri> url)
@@ -104,12 +103,10 @@ namespace Web
 
         if (state == State::inactive_state)
         {
-            std::shared_ptr<IProcess> completion = this->completion.lock();
-            if (completion.get() != 0)
+            std::shared_ptr<IClientEventHandler> event_handler = this->event_handler.lock();
+            if (event_handler.get() != 0)
             {
-                ResponseCompleteEvent event;
-                event.cookie = this->completion_cookie;
-                produce_event(completion.get(), &event);
+                event_handler->response_completed(this->event_handler_cookie);
             }
         }
         else if (state == State::headers_pending_state)
@@ -171,9 +168,9 @@ namespace Web
             Http::serialize<Request>()(this->planned_request.get(), &request_bytes);
             request_bytes.write_to_stream(this->transport.get());
 
-            Basic::globals->DebugWriter()->write_literal("Request sent: ");
-            render_request_line(this->planned_request.get(), &Basic::globals->DebugWriter()->decoder);
-            Basic::globals->DebugWriter()->WriteLine();
+            TextWriter(Basic::globals->LogStream()).write_literal("Request sent: ");
+            render_request_line(this->planned_request.get(), &TextWriter(Basic::globals->LogStream()).decoder);
+            TextWriter(Basic::globals->LogStream()).write_line();
 
             this->planned_request = 0;
         }
@@ -336,9 +333,9 @@ namespace Web
 
                 std::shared_ptr<Response> response = this->history.back().response;
 
-                Basic::globals->DebugWriter()->write_literal("Response received: ");
-                render_response_line(response.get(), &Basic::globals->DebugWriter()->decoder);
-                Basic::globals->DebugWriter()->WriteLine();
+                TextWriter(Basic::globals->LogStream()).write_literal("Response received: ");
+                render_response_line(response.get(), &TextWriter(Basic::globals->LogStream()).decoder);
+                TextWriter(Basic::globals->LogStream()).write_line();
 
                 uint16 code = response->code;
 
@@ -373,12 +370,12 @@ namespace Web
 
                 if (this->planned_request.get() == 0)
                 {
-                    std::shared_ptr<IProcess> completion = this->completion.lock();
-                    if (completion.get() != 0)
+                    std::shared_ptr<IProcess> event_handler = this->event_handler.lock();
+                    if (event_handler.get() != 0)
                     {
                         Http::ResponseHeadersEvent event;
-                        event.cookie = this->completion_cookie;
-                        produce_event(completion.get(), &event);
+                        event.cookie = this->event_handler_cookie;
+                        produce_event(event_handler.get(), &event);
                     }
                 }
 
@@ -432,9 +429,9 @@ namespace Web
                 {
                     UnicodeStringRef cookie_value = it->second;
 
-                    Basic::globals->DebugWriter()->write_literal("Cookie received: ");
+                    TextWriter(Basic::globals->LogStream()).write_literal("Cookie received: ");
                     cookie_value->write_to_stream(Basic::globals->LogStream());
-                    Basic::globals->DebugWriter()->WriteLine();
+                    TextWriter(Basic::globals->LogStream()).write_line();
 
                     // $ conform to RFC6265 section 5.3 (storage model)
 

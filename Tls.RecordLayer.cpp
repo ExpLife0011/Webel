@@ -6,7 +6,6 @@
 #include "Tls.RandomFrame.h"
 #include "Tls.ServerHandshake.h"
 #include "Tls.ClientHandshake.h"
-#include "Basic.Event.h"
 #include "Tls.ServerNameFrame.h"
 #include "Tls.SignatureAndHashAlgorithmFrame.h"
 

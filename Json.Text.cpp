@@ -7,7 +7,6 @@
 #include "Json.Parser.h"
 #include "Json.ObjectFrame.h"
 #include "Json.ArrayFrame.h"
-#include "Basic.Event.h"
 
 namespace Json
 {

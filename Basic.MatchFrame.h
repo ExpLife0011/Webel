@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "Basic.Frame.h"
 #include "Basic.IStream.h"
 
 namespace Basic

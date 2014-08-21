@@ -3,8 +3,6 @@
 #pragma once
 
 #include "Basic.IStream.h"
-#include "Basic.IProcess.h"
-#include "Basic.Event.h"
 
 namespace Json
 {

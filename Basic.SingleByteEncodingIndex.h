@@ -4,6 +4,7 @@
 
 namespace Basic
 {
+    // $$$ should be a persistent object, higher level than basic
     class SingleByteEncodingIndex : public ISingleByteEncodingIndex
     {
     public:

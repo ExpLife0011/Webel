@@ -35,31 +35,40 @@ namespace Basic
         write_elements(text, length);
     }
 
-    void TextWriter::WriteLine(const char* text)
+    void TextWriter::write_line(const char* text)
     {
         write_c_str(text);
-        WriteLine();
+        write_line();
     }
 
-    void TextWriter::WriteLine()
+    void TextWriter::write_line()
     {
         write_literal("\r\n");
     }
 
-    void TextWriter::WriteThreadId()
+    void TextWriter::write_thread_id()
     {
         DWORD threadId = GetCurrentThreadId();
-        WriteFormat<0x100>("%010d", threadId);
+        write_format<0x100>("%010d", threadId);
     }
 
-    void TextWriter::WriteTimestamp()
+    void TextWriter::write_timestamp()
     {
         SYSTEMTIME time;
         GetSystemTime(&time);
-        WriteFormat<0x100>("%04d/%02d/%02d %02d:%02d:%02d.%03d", time.wYear, time.wMonth, time.wDay, time.wHour, time.wMinute, time.wSecond, time.wMilliseconds);
+        write_format<0x100>("%04d/%02d/%02d %02d:%02d:%02d.%03d", time.wYear, time.wMonth, time.wDay, time.wHour, time.wMinute, time.wSecond, time.wMilliseconds);
     }
 
-    void TextWriter::WriteError(uint32 error)
+    void TextWriter::HandleError(const char* context, uint32 error)
+    {
+        write_literal("ERROR: ");
+        write_c_str(context);
+        write_literal(" code=");
+        write_error_code(error);
+        write_line();
+    }
+
+    void TextWriter::write_error_code(uint32 error)
     {
         switch (error)
         {
@@ -912,7 +921,7 @@ namespace Basic
             break;
 
         default:
-            WriteFormat<0x100>("%u / 0x%08X", static_cast<uint32>(error), static_cast<uint32>(error));
+            write_format<0x100>("%u / 0x%08X", static_cast<uint32>(error), static_cast<uint32>(error));
             break;
         }
     }

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Basic.IProcess.h"
+#include "Basic.StateMachine.h"
 #include "Basic.DecNumberStream.h"
 #include "Http.Types.h"
 #include "Http.HeadersFrame.h"
@@ -13,7 +13,7 @@ namespace Http
 {
     using namespace Basic;
 
-    class ResponseHeadersFrame : public Frame
+    class ResponseHeadersFrame : public StateMachine, public UnitStream<byte>
     {
     private:
         enum State
@@ -36,10 +36,11 @@ namespace Http
         DecNumberStream<byte, uint16> number_stream;
         HeadersFrame headers_frame;
 
-        virtual void IProcess::consider_event(IEvent* event);
-
     public:
         ResponseHeadersFrame(UnicodeStringRef method, Response* response);
+
+        virtual void IStream<byte>::write_element(byte element);
+
         void WriteResponseLineTo(IStream<byte>* stream);
     };
 
@@ -57,7 +58,7 @@ namespace Http
 
             UnicodeString code;
             TextWriter writer(&code);
-            writer.WriteFormat<0x10>("%d", value->code);
+            writer.write_format<0x10>("%d", value->code);
 
             stream->write_element(Http::globals->SP);
             code.write_to_stream(&encoder);

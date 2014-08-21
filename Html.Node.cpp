@@ -97,13 +97,13 @@ namespace Html
     void Node::write_to_human(IStream<Codepoint>* stream, bool verbose)
     {
         TextWriter writer(stream);
-        writer.WriteFormat<0x10>("%d", this->type);
+        writer.write_format<0x10>("%d", this->type);
     }
 
     void Node::write_pointer_to_human(IStream<Codepoint>* stream)
     {
         TextWriter writer(stream);
-        writer.WriteFormat<0x10>("%08X", (unsigned long)this);
+        writer.write_format<0x10>("%08X", (unsigned long)this);
     }
 
     bool Node::find_element_with_child_count(Node* after, ElementName* name, uint32 child_count, std::shared_ptr<ElementNode>* result)

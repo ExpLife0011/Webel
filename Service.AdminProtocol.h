@@ -3,7 +3,8 @@
 #pragma once
 
 #include "Basic.CommandFrame.h"
-#include "Basic.IProcess.h"
+#include "Basic.StateMachine.h"
+#include "Basic.ITransportEventHandler.h"
 #include "Basic.IStream.h"
 #include "Basic.NameValueCollection.h"
 #include "Web.Client.h"
@@ -21,7 +22,7 @@ namespace Service
 {
     using namespace Basic;
 
-    class AdminProtocol : public Basic::Frame, public std::enable_shared_from_this<AdminProtocol>
+    class AdminProtocol : public StateMachine, public ITransportEventHandler<Codepoint>, public std::enable_shared_from_this<AdminProtocol>
     {
     private:
         enum State
@@ -34,8 +35,8 @@ namespace Service
         };
 
         std::vector<UnicodeStringRef> command;
-        Basic::CommandFrame<Codepoint> command_frame;
-        std::shared_ptr<Basic::IStream<Codepoint> > peer;
+        Basic::CommandBuilder<Codepoint> command_frame;
+        std::shared_ptr<IStream<Codepoint> > transport;
         std::shared_ptr<Web::Client> client;
         std::shared_ptr<Html::Parser> html_parser;
         std::shared_ptr<Web::Page> current_page;
@@ -48,12 +49,15 @@ namespace Service
 		std::shared_ptr<Scrape::Netflix> netflix_scrape;
 
         void write_to_human_with_context(Html::Node* node, Basic::IStream<Codepoint>* stream, bool verbose);
-
-        virtual void Basic::IProcess::consider_event(Basic::IEvent* event);
+        void consider_event();
 
     public:
-        AdminProtocol(std::shared_ptr<Basic::IStream<Codepoint> > peer);
+        AdminProtocol(std::shared_ptr<Basic::IStream<Codepoint> > transport);
 
-        void reset(std::shared_ptr<Basic::IStream<Codepoint> > peer);
+        virtual void ITransportEventHandler<Codepoint>::transport_connected();
+        virtual void ITransportEventHandler<Codepoint>::transport_disconnected();
+        virtual void ITransportEventHandler<Codepoint>::transport_received(const Codepoint* elements, uint32 count);
+        bool receiver_received(ElementSource<Codepoint>* elements);
+        void tbd_event(); // $$$
     };
 }
